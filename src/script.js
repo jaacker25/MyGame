@@ -5,7 +5,9 @@ const btnStart=document.querySelector(".start-button");
 let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
-const gunShoots=[]
+let countFrames=0;
+const gunShoots=[];
+const ships=[];
 
 images={
 fakeBackground:'./images/fake_menu.png',
@@ -14,7 +16,9 @@ btnPlay:'./images/play.png',
 btnSprite:'./images/buttons.png',
 back1stStage: './images/1stStage_color.png',
 hunter: './images/spritesheet_han.png',
-bullets: './images/bullets.png'
+bullets: './images/bullets.png',
+controls: './images/controls.png',
+boats: './images/spritesheet_boats.png'
 
 }
 //Cargamos Audios
@@ -23,6 +27,16 @@ const shootGunAudio=new Audio('./audio/shootGun.mp3');
 const longShootGunAudio=new Audio('./audio/longShootGun.mp3');
 
 //Cargamos Imagenes
+const boats=new Image()
+boats.src=images.boats;
+boats.onload=()=>{
+  return;
+}
+const controls=new Image()
+controls.src=images.controls;
+controls.onload=()=>{
+  return;
+}
 const bullets=new Image()
 bullets.src=images.bullets;
 bullets.onload=()=>{
@@ -131,31 +145,61 @@ class Bullet{
 constructor(x){
   this.x=x;
   this.y=545;
-  this.sx=5;
-  this.sy=67;
+  this.sx=67;
+  this.sy=5;
   this.width=52;
   this.height=20;
 }
 draw(){
   this.x+=10;
-  ctx.fillRect(this.x,this.y,10,10);
- /* ctx.drawImage(bullets,this.sx,
+  //ctx.fillRect(this.x,this.y,10,10);
+  ctx.drawImage(bullets,this.sx,
     this.sy,
     this.width,
     this.height,
     this.x,
     this.y,
     this.width,
-    this.height);*/
-}
-isTouch(bullet){
-  return(
-       this.x >= canvas.width
- 
-  )
-  }
+    this.height);
 }
 
+}
+///-----------------------------CLASE SHIPS
+
+class Ships{
+  constructor(){
+    this.x=-311;
+    this.y=427;
+    this.sx=5;
+    this.sy=5;
+    this.width=311;
+    this.height=118;
+  }
+  draw(){
+    this.x+=2;
+    ctx.drawImage(boats,this.sx,
+      this.sy,
+      this.width,
+      this.height,
+      this.x,
+      this.y,
+      this.width,
+      this.height);
+  }
+
+}
+
+class DadCroc{
+constructor(){
+  this.x=-311;
+  this.y=427;
+  this.sx=5;
+  this.sy=5;
+  this.width=311;
+  this.height=118;
+}
+
+}
 
 
 //Lo primero que aparecera, al moneto de cargar la pagina
@@ -170,9 +214,10 @@ ctx.drawImage(fName,500,550);
 ctx.drawImage(btnPlay,950,325,179,197);
 //Dibuja Check In (Ingresa tu nombre para continuar)
 ctx.drawImage(btnSprite,0,200,413,138,800,50,380,80)
+ctx.textAlign = "center";
 ctx.font = '45px Ubuntu';
 ctx.fillStyle='white';
-ctx.fillText("What's your name",860,105,250)
+ctx.fillText("What's your name",600,115,350)
 //Check Name 
 
 }
@@ -190,6 +235,7 @@ interval = setInterval(update1stStage, 1000 / 60)
 //reproducimos musica de fondo
 audio1stStage.play();
 frames=0;
+countFrames=0;
 
 }
 
@@ -198,16 +244,52 @@ function update1stStage(){
 frames++;
 ctx.clearRect(0,0,canvas.width,canvas.height);
 ctx.drawImage(back1stStage,0,0,canvas.width,canvas.height);
+
+drawShips();
+
+
+ctx.drawImage(boats,324,5,444,450,717,118,444,450);
+
+
+//despliega por 15 segundos las instrucciones
+if(frames<60*15){
+ctx.strokeStyle='white'
+ctx.strokeRect(334,10,532,186)
+ctx.drawImage(controls,334,10,532,186);
+ctx.font = '40px Ubuntu';
+ctx.fillStyle='white';
+ctx.fillText('Welcome Player 1',500,235,200)
+}
+
 hunterHan.draw();
-gunShoots.forEach(bullets=>bullets.draw())
+gunShoots.forEach((bullets,index)=>{
+  if(bullets.x>1200){
+    gunShoots.splice(index,1)
+  }else{                
+  bullets.draw()}})
+
 }
 
 function shootGun(){
   shootGunAudio.play();
-  gunShoots.push (new Bullet(hunterHan.x+180))
-
-  
+  gunShoots.push (new Bullet(hunterHan.x+180))  
 }
+
+function drawShips(){
+
+  let rnd;
+  rnd=Math.floor(Math.random() * (canvas.width-500 - 100)) + 100;
+if(frames%rnd===0){
+ships.push (new Ships())
+}
+
+  ships.forEach((ship,index)=>{
+    if(ship.x>1200){
+      ships.splice(index,1)
+    }else{                
+    ship.draw()}})
+}
+
 
 //-------------------------------------------------first STAGE-------------------
 
