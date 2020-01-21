@@ -5,6 +5,7 @@ const btnStart=document.querySelector(".start-button");
 let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
+let drawDad=false;
 let countFrames=0;
 const gunShoots=[];
 const ships=[];
@@ -18,7 +19,8 @@ back1stStage: './images/1stStage_color.png',
 hunter: './images/spritesheet_han.png',
 bullets: './images/bullets.png',
 controls: './images/controls.png',
-boats: './images/spritesheet_boats.png'
+boats: './images/spritesheet_boats.png',
+croc3: './images/spritesheet_croc3.png'
 
 }
 //Cargamos Audios
@@ -27,6 +29,11 @@ const shootGunAudio=new Audio('./audio/shootGun.mp3');
 const longShootGunAudio=new Audio('./audio/longShootGun.mp3');
 
 //Cargamos Imagenes
+const croc3=new Image()
+croc3.src=images.croc3;
+croc3.onload=()=>{
+  return;
+}
 const boats=new Image()
 boats.src=images.boats;
 boats.onload=()=>{
@@ -176,7 +183,9 @@ class Ships{
     this.height=118;
   }
   draw(){
+    
     this.x+=2;
+  
     ctx.drawImage(boats,this.sx,
       this.sy,
       this.width,
@@ -188,18 +197,52 @@ class Ships{
   }
 
 }
-
+///-----------------------------CLASE DADCROC
 class DadCroc{
 constructor(){
-  this.x=-311;
-  this.y=427;
-  this.sx=5;
+  this.x=1300;
+  this.y=465;
+  this.sx=545;
   this.sy=5;
-  this.width=311;
-  this.height=118;
+  this.width=200;
+  this.height=210;
+}
+draw(){
+  
+  ctx.drawImage(croc3,this.sx,
+    this.sy,
+    this.width,
+    this.height,
+    this.x,
+    this.y,
+    this.width,
+    this.height);
+}
+goLeft(){
+  if(this.x>880){
+    if(drawDad){
+      this.sx=545;
+      drawDad=false;
+    }else{
+      this.sx=965;
+      drawDad=true;
+    } 
+   this.x-=4;
+   }
 }
 
+isTouch(bullet){
+  return(
+       this.x < bullet.x + bullet.width &&
+       this.x + this.width > bullet.x &&
+       this.y < bullet.y + bullet.height &&
+       this.y + this.height > bullet.y
+ 
+  )
+  }
+
 }
+const crocDad=new DadCroc();
 
 
 //Lo primero que aparecera, al moneto de cargar la pagina
@@ -260,6 +303,12 @@ ctx.font = '40px Ubuntu';
 ctx.fillStyle='white';
 ctx.fillText('Welcome Player 1',500,235,200)
 }
+//if(frames>60*20){
+  if(frames%8===0){
+    crocDad.goLeft();
+    }
+  crocDad.draw();
+//}
 
 hunterHan.draw();
 gunShoots.forEach((bullets,index)=>{
