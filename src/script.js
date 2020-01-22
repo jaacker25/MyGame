@@ -1,7 +1,13 @@
+const bod=document.querySelector('.bod');
+
+
 const canvas=document.querySelector('canvas');
 const ctx=canvas.getContext('2d');
 const inputName=document.querySelector('.input-name');
 const btnStart=document.querySelector(".start-button");
+const btnVsPc=document.querySelector(".btn-vs-pc");
+const btnPvsP=document.querySelector(".btn-pvsp");
+const btnS=document.querySelector(".btn-s");
 let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
@@ -9,11 +15,13 @@ let drawDad=false;
 let gameOver1s=false;
 let secondFrame=0;
 let countFrames=0;
+let firstStage=true;
 const gunShoots=[];
 const ships=[];
 
 images={
 fakeBackground:'./images/fake_menu.png',
+crocBackground: './images/crocBackground.png',
 fakeName:'./images/fake_name.png',
 btnPlay:'./images/play.png',
 btnSprite:'./images/buttons.png',
@@ -25,17 +33,31 @@ bullets: './images/bullets.png',
 controls: './images/controls.png',
 boats: './images/spritesheet_boats.png',
 croc3: './images/spritesheet_croc3.png',
-youLose: './images/youLose.png'
+youLose: './images/youLose.png',
+backPvsP: './images/gamePvsP.png'
 
 }
 //Cargamos Audios
 const audio1stStage=new Audio('./audio/1stStage.mp3');
+const audioMenu=new Audio('./audio/audioMenu.mp3');
 const audioCrocDadKilled=new Audio('./audio/crocDadKilled.mp3');
 const shootGunAudio=new Audio('./audio/shootGun.mp3');
 const audioPunch=new Audio('./audio/punch.mp3');
 const longShootGunAudio=new Audio('./audio/longShootGun.mp3');
+const audioBtn=new Audio('./audio/audio-btn.mp3');
+const audio2ndStage=new Audio('./audio/audioStage2.mp3');
 
 //Cargamos Imagenes
+const backPvsP=new Image()
+backPvsP.src=images.backPvsP;
+backPvsP.onload=()=>{
+  return;
+}
+const crocBackground=new Image()
+crocBackground.src=images.crocBackground;
+crocBackground.onload=()=>{
+  return;
+}
 const youLose=new Image()
 youLose.src=images.youLose;
 youLose.onload=()=>{
@@ -101,6 +123,7 @@ fBackground.src = images.fakeBackground;
 fBackground.onload = () => {
 fakeStart();//------------------------------------------AQUI INICIA TODO
 //goFirstStage();
+//goMenu();
 }
 //Declaramos las clases
 //------------------------------CLASE HUNTER
@@ -312,7 +335,7 @@ ctx.drawImage(back1stStageColor,0,0,canvas.width,canvas.height);
 
 drawShips();
 }else{
- if((frames-secondFrame)>120){
+ if((frames-secondFrame)>180){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(back1stStageBlack,0,0,canvas.width,canvas.height);
   ctx.drawImage(youLose,334,10,532,186);
@@ -338,13 +361,18 @@ ctx.drawImage(controls,334,10,532,186);
 ctx.font = '40px Ubuntu';
 ctx.textAlign = "center";
 ctx.fillStyle='white';
-ctx.fillText('Welcome Player 1',600,235,200)
+ctx.fillText(`Welcome ${inputText}.`,600,235,200)
 }
 if(frames>60*20){
   if(!gameOver1s&&frames%8===0){
     crocDad.goLeft();
     }
   crocDad.draw();
+}
+
+if(crocDad.x<=880&&!gameOver1s){
+  ctx.fillStyle='#A5DC27';
+  ctx.fillText('HI!',845,477)
 }
 
 hunterHan.draw();
@@ -404,44 +432,170 @@ ships.push (new Ships())
 }
 
 
+
 //-------------------------------------------------first STAGE-------------------
 
 
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Second Stage <<<<<<<<<<<<<<<<<<<<<<
+
+function goMenu(){
+  audioCrocDadKilled.pause();
+  clearInterval(interval); //comentado momentaneo
+  firstStage=false;
+  frames=0;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(crocBackground,0,0,canvas.width,canvas.height);
+  audioMenu.loop=true;
+  audioMenu.play();
+ //habilita botones
+ btnVsPc.setAttribute("style", "display:block");
+ btnPvsP.setAttribute("style", "display:block");
+ btnS.setAttribute("style", "display:block");
+
+}
+
+function goGamePvsP(){
+//Borramos la pantalla de inicio y botones
+btnVsPc.setAttribute("style", "display:none");
+btnPvsP.setAttribute("style", "display:none");
+btnS.setAttribute("style", "display:none");
+ctx.clearRect(0,0,canvas.width,canvas.height);
+//Cargamos el nuevo escenario
+ctx.drawImage(backPvsP,0,0,canvas.width,canvas.height);
+//interval = setInterval(update2stage, 1000 / 60)
+
+//reproducimos musica de fondo
+audio2ndStage.loop=true;
+audio2ndStage.play();
+frames=0;
+
+}
+
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Second Stage <<<<<<<<<<<<<<<<<<<<<<
+
+
+
 function fullfScreen(){
-    if (canvas.webkitRequestFullScreen) {
-        canvas.webkitRequestFullScreen()
+    if (bod.webkitRequestFullScreen) {
+        bod.webkitRequestFullScreen()
       } else {
-        canvas.mozRequestFullScreen()
+        bod.mozRequestFullScreen()
       }
 
 }
 
+
 document.addEventListener('keydown', ({ keyCode }) => {
     switch (keyCode) {
       case 39:
+        if(firstStage){
         return hunterHan.goRight()
+        }
+        break;
       case 32:
+        if(firstStage){
         return hunterHan.attack()
+        }
+        break;
       case 38:
+        if(firstStage){
         if(hunterHan.y===475)
         return hunterHan.jump()
+        }
         break;    
       case 37:
+        if(firstStage){
         return hunterHan.goLeft()
-  
+        }
+        break;
       case 40:
+        if(firstStage){
         return hunterHan.goDown()
-  
+        }
+        break;
       case 70:
         fullfScreen();
+      case 13:
+        if(firstStage){
+        if(gameOver1s){
+        goMenu();
+        }
+      }
+        break;
     }
   })
 //LEE boton de inicio en fakeInicio
   btnStart.onclick = function() {
     inputText=inputName.value;
     longShootGunAudio.play();
-    goFirstStage();
+    setTimeout(function(){
+      fullfScreen();
+      goFirstStage();
+    }, 1000); 
+    
   };
+
+
+  //LEE boton de PvsP
+  btnPvsP.onclick = function() {
+    audioBtn.play();
+    audioMenu.pause();
+    setTimeout(function(){
+      goGamePvsP();
+    }, 1000); 
+    
+  };
+
+ //LEE boton de vsPC
+ btnVsPc.onclick = function() {
+  audioBtn.play();
+  audioMenu.pause();
+  setTimeout(function(){
+    //goGameVsPC();
+  }, 1000); 
+  
+};
+
+ //LEE boton de SuperGame
+ btnS.onclick = function() {
+  audioBtn.play();
+  audioMenu.pause();
+  setTimeout(function(){
+    //goGameSuper();
+  }, 1000); 
+  
+};
+
+
+
+
+
+
+
 
   //Se ejecuta apenas abre la pagina
 //  fakeStart();
+
+
+/*
+let screenLog = document.querySelector('#screen-log');
+
+
+function logKey(e) {
+
+    ctx.fillStyle='white'
+    ctx.fillRect(e.offsetX-50,e.offsetY,10,10);
+
+}
+*/
+/*
+document.addEventListener('mousemove', clickEvent);
+function clickEvent(e) {
+  // e = Mouse click event.
+  var rect = e.target.getBoundingClientRect();
+  var x = e.clientX - rect.left; //x position within the element.
+  var y = e.clientY - rect.top;  //y position within the element.
+  ctx.fillStyle='red'
+  ctx.fillRect(x,y,10,10);
+}*/
