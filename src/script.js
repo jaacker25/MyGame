@@ -6,6 +6,8 @@ let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
 let drawDad=false;
+let gameOver1s=false;
+let secondFrame=0;
 let countFrames=0;
 const gunShoots=[];
 const ships=[];
@@ -15,20 +17,40 @@ fakeBackground:'./images/fake_menu.png',
 fakeName:'./images/fake_name.png',
 btnPlay:'./images/play.png',
 btnSprite:'./images/buttons.png',
-back1stStage: './images/1stStage_color.png',
+back1stStageColor: './images/1stStage_color.png',
+back1stStageGray: './images/1stStage_gray.png',
+back1stStageBlack: './images/1stStage_black.png',
 hunter: './images/spritesheet_han.png',
 bullets: './images/bullets.png',
 controls: './images/controls.png',
 boats: './images/spritesheet_boats.png',
-croc3: './images/spritesheet_croc3.png'
+croc3: './images/spritesheet_croc3.png',
+youLose: './images/youLose.png'
 
 }
 //Cargamos Audios
 const audio1stStage=new Audio('./audio/1stStage.mp3');
+const audioCrocDadKilled=new Audio('./audio/crocDadKilled.mp3');
 const shootGunAudio=new Audio('./audio/shootGun.mp3');
+const audioPunch=new Audio('./audio/punch.mp3');
 const longShootGunAudio=new Audio('./audio/longShootGun.mp3');
 
 //Cargamos Imagenes
+const youLose=new Image()
+youLose.src=images.youLose;
+youLose.onload=()=>{
+  return;
+}
+const back1stStageBlack=new Image()
+back1stStageBlack.src=images.back1stStageBlack;
+back1stStageBlack.onload=()=>{
+  return;
+}
+const back1stStageGray=new Image()
+back1stStageGray.src=images.back1stStageGray;
+back1stStageGray.onload=()=>{
+  return;
+}
 const croc3=new Image()
 croc3.src=images.croc3;
 croc3.onload=()=>{
@@ -54,9 +76,9 @@ hunter.src=images.hunter;
 hunter.onload=()=>{
   return;
 }
-const back1stStage=new Image()
-back1stStage.src=images.back1stStage;
-back1stStage.onload=()=>{
+const back1stStageColor=new Image()
+back1stStageColor.src=images.back1stStageColor;
+back1stStageColor.onload=()=>{
   return;
 }
 const btnSprite=new Image()
@@ -77,8 +99,8 @@ btnPlay.onload=()=>{
 const fBackground = new Image()
 fBackground.src = images.fakeBackground;
 fBackground.onload = () => {
-//fakeStart();//------------------------------------------AQUI INICIA TODO
-goFirstStage();
+fakeStart();//------------------------------------------AQUI INICIA TODO
+//goFirstStage();
 }
 //Declaramos las clases
 //------------------------------CLASE HUNTER
@@ -159,7 +181,6 @@ constructor(x){
 }
 draw(){
   this.x+=10;
-  //ctx.fillRect(this.x,this.y,10,10);
   ctx.drawImage(bullets,this.sx,
     this.sy,
     this.width,
@@ -200,7 +221,7 @@ class Ships{
 ///-----------------------------CLASE DADCROC
 class DadCroc{
 constructor(){
-  this.x=1300;
+  this.x=1200;
   this.y=465;
   this.sx=545;
   this.sy=5;
@@ -257,10 +278,9 @@ ctx.drawImage(fName,500,550);
 ctx.drawImage(btnPlay,950,325,179,197);
 //Dibuja Check In (Ingresa tu nombre para continuar)
 ctx.drawImage(btnSprite,0,200,413,138,800,50,380,80)
-ctx.textAlign = "center";
 ctx.font = '45px Ubuntu';
 ctx.fillStyle='white';
-ctx.fillText("What's your name",600,115,350)
+ctx.fillText("What's your name",860,105,250)
 //Check Name 
 
 }
@@ -272,7 +292,7 @@ inputName.setAttribute("style", "display:none");
 btnStart.setAttribute("style", "display:none");
 ctx.clearRect(0,0,canvas.width,canvas.height);
 //Cargamos el nuevo escenario
-ctx.drawImage(back1stStage,0,0,canvas.width,canvas.height);
+ctx.drawImage(back1stStageGray,0,0,canvas.width,canvas.height);
 interval = setInterval(update1stStage, 1000 / 60)
 
 //reproducimos musica de fondo
@@ -285,11 +305,27 @@ countFrames=0;
 
 function update1stStage(){
 frames++;
+
+if(!gameOver1s){
 ctx.clearRect(0,0,canvas.width,canvas.height);
-ctx.drawImage(back1stStage,0,0,canvas.width,canvas.height);
+ctx.drawImage(back1stStageColor,0,0,canvas.width,canvas.height);
 
 drawShips();
+}else{
+ if((frames-secondFrame)>120){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(back1stStageBlack,0,0,canvas.width,canvas.height);
+  ctx.drawImage(youLose,334,10,532,186);
+  ctx.textAlign = "center";
+  ctx.font = '40px Ubuntu';
+  ctx.fillStyle='white';
+  ctx.fillText('Press Enter to Continue',600,235,200)
+ }else{
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(back1stStageGray,0,0,canvas.width,canvas.height);
+ }
 
+}
 
 ctx.drawImage(boats,324,5,444,450,717,118,444,450);
 
@@ -300,23 +336,51 @@ ctx.strokeStyle='white'
 ctx.strokeRect(334,10,532,186)
 ctx.drawImage(controls,334,10,532,186);
 ctx.font = '40px Ubuntu';
+ctx.textAlign = "center";
 ctx.fillStyle='white';
-ctx.fillText('Welcome Player 1',500,235,200)
+ctx.fillText('Welcome Player 1',600,235,200)
 }
-//if(frames>60*20){
-  if(frames%8===0){
+if(frames>60*20){
+  if(!gameOver1s&&frames%8===0){
     crocDad.goLeft();
     }
   crocDad.draw();
-//}
+}
 
 hunterHan.draw();
 gunShoots.forEach((bullets,index)=>{
   if(bullets.x>1200){
     gunShoots.splice(index,1)
   }else{                
-  bullets.draw()}})
+  bullets.draw()}})//--------------------------------------------
+  if(crocDad.x<1000&&!gameOver1s){
+  checkColisionCrocBullet();
+  }
+}
 
+function checkColisionCrocBullet(){
+  gunShoots.forEach(bullets=>{
+    if(crocDad.isTouch(bullets)){
+      audioPunch.play();
+      gameOverStage1();
+  
+    }
+  })
+}
+
+function gameOverStage1(){
+  gameOver1s=true;
+  secondFrame=frames;
+  audio1stStage.pause();
+  audioCrocDadKilled.play();
+  //drawKilledCROC
+  crocDad.y=530;
+  crocDad.sx=5;
+  crocDad.sy=5;
+  crocDad.width=260;
+  crocDad.height=165;
+  crocDad.draw();
+   
 }
 
 function shootGun(){
