@@ -14,6 +14,7 @@ let frames=0;
 let drawDad=false;//animacion de caminar
 let drawP1=0;//animacion de caminar
 let drawP2=0;//animacion de caminar
+let viewHunter=true;//saber a que lado mira el cazador
 let viewP1=true;//saber a que lado esta volteando el jugador
 let viewP2=true;//saber a que lado esta volteando el jugador
 let gameOver1s=false; //saber si ya termino el juego en primer escenario
@@ -27,6 +28,7 @@ const shootsP2=[];
 const ships=[];
 const planesR=[];
 const planesL=[];
+const hearts=[];
 
 images={
 fakeBackground:'./images/fake_menu.png',
@@ -47,7 +49,8 @@ backPvsP: './images/backPvsP.png',
 wavesPvsP: './images/backWaves.png',
 pvspImages: './images/sprite-PvsP.png',
 croc1: './images/spritesheet_croc1.png',
-croc2: './images/spritesheet_croc2.png'
+croc2: './images/spritesheet_croc2.png',
+heart: './images/heart.png'
 
 }
 //Cargamos Audios
@@ -63,6 +66,11 @@ const audioP1=new Audio('./audio/audioP1.mp3');
 const audioP2=new Audio('./audio/audioP2.mp3');
 
 //Cargamos Imagenes
+const heart=new Image()
+heart.src=images.heart;
+heart.onload=()=>{
+  return;
+}
 const pvspImages=new Image()
 pvspImages.src=images.pvspImages;
 pvspImages.onload=()=>{
@@ -186,11 +194,15 @@ draw(){
        }
 jump(){
   this.y=475;
-  this.sx=1067;
   this.width=128;
   this.height=200;
-    
+  if(viewHunter){
+    this.sx=1067;
+    }else{
+      this.sx=929;
+    }
   this.y-=250;
+  
 }
 goRight(){
   if(this.x<400){
@@ -199,7 +211,10 @@ goRight(){
   this.width=117;
   this.height=200;
   this.x+=10;
+  
   }
+
+  viewHunter=true;
 }
 goLeft(){
   if(this.x>0){
@@ -209,10 +224,15 @@ goLeft(){
   this.height=200;
   this.x-=10;
   }
+  viewHunter=false;
 }
 goDown(){
   this.y=515;
-  this.sx=790;
+  if(viewHunter){
+    this.sx=790;
+    }else{
+      this.sx=651;
+    }
   this.width=129;
   this.height=160;
   return;
@@ -769,6 +789,7 @@ this.limitY=398
 shootFireP2();
 }
 }
+const player2=new Player2();
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 class BallFireP1{
   constructor(x){
@@ -816,14 +837,34 @@ class BallFireP1{
     
     }
 
-const player2=new Player2();
+
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+class Hearts{
+  constructor(x){
+    this.x=x;
+    this.y=110;
+    this.width=42;
+    this.height=36;
+  }
+  draw(){
+    
+    this.y+=10;
+  
+    ctx.drawImage(heart,
+      this.x,
+      this.y,
+      this.width,
+      this.height);
+  }
+
+}
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 function goMenu(){
   audioCrocDadKilled.pause();
 clearInterval(interval); //comentado momentaneo!!!!!!
- //inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
- //btnStart.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
+// inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
+// btnStart.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
   firstStage=false;
   frames=0;
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -890,7 +931,7 @@ function shootFireP1(){
   shootsP1.push (new BallFireP1(player1.x+130))  
 }
 function shootFireP2(){
-  audioP1.play();
+  audioP2.play();
   shootsP2.push (new BallFireP2(player2.x-45))  
 }
 
@@ -910,11 +951,28 @@ function drawShootsP2(){
     shootP2.draw()}})
 }
 
+function drawHearts(){
+
+  let rnd;
+  rnd=Math.floor(Math.random()*canvas.width);
+if(frames%400===0){
+hearts.push (new Hearts(rnd))
+}
+
+  hearts.forEach((heart,index)=>{
+    if(heart.y>720){
+      hearts.splice(index,1)
+    }else{                
+    heart.draw()}})
+}
+
 function updatePP(){
 frames++;
 ctx.clearRect(0,0,canvas.width,canvas.height);
 ctx.drawImage(backPvsP,0,0,canvas.width,canvas.height);
+drawHearts();
 backGamepp.draw();
+
 drawPlanesR();
 drawPlanesL();
   player1.draw();
@@ -1066,20 +1124,20 @@ document.addEventListener('keyup', ({ keyCode }) => {
  //LEE boton de vsPC
  btnVsPc.onclick = function() {
   audioBtn.play();
-  audioMenu.pause();
-  setTimeout(function(){
+  //audioMenu.pause();
+ // setTimeout(function(){
     //goGameVsPC();
-  }, 1000); 
+ // }, 1000); 
   
 };
 
  //LEE boton de SuperGame
  btnS.onclick = function() {
   audioBtn.play();
-  audioMenu.pause();
-  setTimeout(function(){
+  //audioMenu.pause();
+  //setTimeout(function(){
     //goGameSuper();
-  }, 1000); 
+ // }, 1000); 
   
 };
 
