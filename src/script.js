@@ -11,13 +11,19 @@ const btnS=document.querySelector(".btn-s");
 let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
-let drawDad=false;
+let drawDad=false;//animacion
+let drawP1=0;//animacion
+let drawP2=0;//animacion
+let viewP1=true;
 let gameOver1s=false;
 let secondFrame=0;
 let countFrames=0;
 let firstStage=true;
+let secondStage=false;
 const gunShoots=[];
 const ships=[];
+const planesR=[];
+const planesL=[];
 
 images={
 fakeBackground:'./images/fake_menu.png',
@@ -34,7 +40,11 @@ controls: './images/controls.png',
 boats: './images/spritesheet_boats.png',
 croc3: './images/spritesheet_croc3.png',
 youLose: './images/youLose.png',
-backPvsP: './images/gamePvsP.png'
+backPvsP: './images/backPvsP.png',
+wavesPvsP: './images/backWaves.png',
+pvspImages: './images/sprite-PvsP.png',
+croc1: './images/spritesheet_croc1.png',
+croc2: './images/spritesheet_croc2.png'
 
 }
 //Cargamos Audios
@@ -46,8 +56,20 @@ const audioPunch=new Audio('./audio/punch.mp3');
 const longShootGunAudio=new Audio('./audio/longShootGun.mp3');
 const audioBtn=new Audio('./audio/audio-btn.mp3');
 const audio2ndStage=new Audio('./audio/audioStage2.mp3');
+const audioP1=new Audio('./audio/audioP1.mp3');
+const audioP2=new Audio('./audio/audioP2.mp3');
 
 //Cargamos Imagenes
+const pvspImages=new Image()
+pvspImages.src=images.pvspImages;
+pvspImages.onload=()=>{
+  return;
+}
+const wavesPvsP=new Image()
+wavesPvsP.src=images.wavesPvsP;
+wavesPvsP.onload=()=>{
+  return;
+}
 const backPvsP=new Image()
 backPvsP.src=images.backPvsP;
 backPvsP.onload=()=>{
@@ -71,6 +93,16 @@ back1stStageBlack.onload=()=>{
 const back1stStageGray=new Image()
 back1stStageGray.src=images.back1stStageGray;
 back1stStageGray.onload=()=>{
+  return;
+}
+const croc1=new Image()
+croc1.src=images.croc1;
+croc1.onload=()=>{
+  return;
+}
+const croc2=new Image()
+croc2.src=images.croc2;
+croc2.onload=()=>{
   return;
 }
 const croc3=new Image()
@@ -380,7 +412,7 @@ gunShoots.forEach((bullets,index)=>{
   if(bullets.x>1200){
     gunShoots.splice(index,1)
   }else{                
-  bullets.draw()}})//--------------------------------------------
+  bullets.draw()}})
   if(crocDad.x<1000&&!gameOver1s){
   checkColisionCrocBullet();
   }
@@ -437,10 +469,260 @@ ships.push (new Ships())
 
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Second Stage <<<<<<<<<<<<<<<<<<<<<<
+class Board {
+  constructor() {
+    this.x = 0
+    this.y = 588
+    this.width = 2*canvas.width
+    this.height = 132
+  }
+  draw() {
+    this.x--
+    if (this.x < -(2*canvas.width)) this.x = 0
+    ctx.drawImage(wavesPvsP, this.x, this.y, this.width, this.height)
+    ctx.drawImage(wavesPvsP, this.x + (2*canvas.width), this.y, this.width, this.height)
+  }
+}
+const backGamepp=new Board();
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+class Planes{
+  constructor(direction){
+    this.direction=direction;
+    if(this.direction==='r'){
+    this.x=-120;
+    this.y=110;
+    this.width=60;
+    this.height=78;
+    }else{
+      this.x=1200;
+      this.y=140;
+    this.width=40;
+    this.height=58;
+    }
+    
+    this.sx=1000;
+    this.sy=5;
+
+  }
+  draw(){
+    if(this.direction==='r'){
+    this.x+=6;
+  
+    ctx.drawImage(pvspImages,1000,
+      this.sy,
+      119,
+      156,
+      this.x,
+      this.y,
+      this.width,
+      this.height);
+    }else{
+      this.x-=4;
+  
+      ctx.drawImage(pvspImages,871,
+        this.sy,
+        119,
+        156,
+        this.x,
+        this.y,
+        this.width,
+        this.height);
+
+    }
+
+  }
+
+}
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+class Player1{
+  constructor(){
+    this.x=25;
+    this.y=410;
+    this.sx=5;
+    this.sy=5;
+    this.width=160;
+    this.height=168;
+    this.limitY=410;
+  }
+draw(){
+  if(this.y<this.limitY){
+      this.y+=10;//10
+  }
+  ctx.drawImage(croc1,this.sx,
+                      this.sy,
+                      this.width,
+                      this.height,
+                      this.x,
+                      this.y,
+                      this.width,
+                      this.height);
+       }
+jump(){
+  this.y=410;
+  this.width=168;
+  this.height=168;
+  this.y-=300;//250
+  if(viewP1){
+  this.sx=1437;
+  }else{
+    this.sx=1615;
+  }
+  this.limitY=410;
+}
+goRight(){
+  if(this.x<210){
+  this.y=410;
+  this.width=160;
+  this.height=168;
+  this.x+=10;
+  
+  switch (drawP1){
+    case 0:
+      this.sx=5;
+      drawP1=1;
+      break;
+    case 1:
+      this.sx=1793;
+      drawP1=2;
+      break;
+    case 2:
+      this.sx=345;
+      drawP1=3;
+      break;
+    default:
+      this.sx=1793;
+      drawP1=0;
+      break;
+  }
+
+  }
+  this.limitY=410;
+   viewP1=true;
+}
+goLeft(){
+  if(this.x>0){
+    this.y=410;
+    this.width=160;
+    this.height=168;
+    this.x-=10;
+    
+    switch (drawP1){
+      case 0:
+        this.sx=175;
+        drawP1=1;
+        break;
+      case 1:
+        this.sx=1963;
+        drawP1=2;
+        break;
+      case 2:
+        this.sx=515;
+        drawP1=3;
+        break;
+      default:
+        this.sx=1963;
+        drawP1=0;
+        break;
+    }
+
+    }
+   //  this.x-=4;
+   this.limitY=410;
+   viewP1=false;
+}
+goDown(){
+  this.y=466;
+  this.width=200;
+  this.height=112;
+  if(viewP1){
+    this.sx=1017;
+    }else{
+      this.sx=1227;
+    }
+}
+attack(){
+  this.y=398;
+  this.width=156;
+  this.height=180;
+    this.sx=685;
+this.limitY=398
+shootFireP1();
+}
+}
+const player1=new Player1();
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+class Player2{
+  constructor(){
+    this.x=62;
+    this.y=475;
+    this.sx=5;
+    this.sy=5;
+    this.width=117;
+    this.height=200;
+  }
+draw(){
+  if(this.y<475){
+      this.y+=10;
+  }
+  ctx.drawImage(hunter,this.sx,
+                      this.sy,
+                      this.width,
+                      this.height,
+                      this.x,
+                      this.y,
+                      this.width,
+                      this.height);
+       }
+jump(){
+  this.y=475;
+  this.sx=1067;
+  this.width=128;
+  this.height=200;
+    
+  this.y-=250;
+}
+goRight(){
+  if(this.x<400){
+  this.y=410;
+  this.sx=5;
+  this.width=160;
+  this.height=168;
+  this.x+=10;
+  }
+}
+goLeft(){
+  if(this.x>0){
+  this.y=475;
+  this.sx=132;
+  this.width=117;
+  this.height=200;
+  this.x-=10;
+  }
+}
+goDown(){
+  this.y=515;
+  this.sx=790;
+  this.width=129;
+  this.height=160;
+  return;
+}
+attack(){
+  this.y=398;
+  this.sx=455;
+  this.width=186;
+  this.height=200;
+  shootGun();
+
+}
+}
+
+const player2=new Player2();
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 function goMenu(){
   audioCrocDadKilled.pause();
-  clearInterval(interval); //comentado momentaneo
+  clearInterval(interval); //comentado momentaneo!!!!!!
+ //inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
   firstStage=false;
   frames=0;
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -462,7 +744,8 @@ btnS.setAttribute("style", "display:none");
 ctx.clearRect(0,0,canvas.width,canvas.height);
 //Cargamos el nuevo escenario
 ctx.drawImage(backPvsP,0,0,canvas.width,canvas.height);
-//interval = setInterval(update2stage, 1000 / 60)
+intervale = setInterval(updatePP, 1000 / 60)
+secondStage=true;
 
 //reproducimos musica de fondo
 audio2ndStage.loop=true;
@@ -471,17 +754,62 @@ frames=0;
 
 }
 
+function drawPlanesR(){
+
+  let rnd;
+  rnd=Math.floor(Math.random() * (canvas.width-500 - 100)) + 100;
+if(frames%rnd===0){
+planesR.push (new Planes('r'))
+}
+
+  planesR.forEach((planeR,index)=>{
+    if(planeR.x>1200){
+      planesR.splice(index,1)
+    }else{                
+    planeR.draw()}})
+}
+
+function drawPlanesL(){
+
+  let rnd;
+  rnd=Math.floor(Math.random() * (canvas.width-500 - 100)) + 100;
+if(frames%rnd===0){
+planesL.push (new Planes('l'))
+}
+
+  planesL.forEach((planeL,index)=>{
+    if(planeL.x<-120){
+      planesL.splice(index,1)
+    }else{                
+    planeL.draw()}})
+}
+
+function shootFireP1(){
+  audioP1.play();
+}
+
+function updatePP(){
+frames++;
+ctx.clearRect(0,0,canvas.width,canvas.height);
+ctx.drawImage(backPvsP,0,0,canvas.width,canvas.height);
+backGamepp.draw();
+drawPlanesR();
+drawPlanesL();
+  player1.draw();
+
+
+}
+
 
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Second Stage <<<<<<<<<<<<<<<<<<<<<<
 
 
-
 function fullfScreen(){
-    if (bod.webkitRequestFullScreen) {
-        bod.webkitRequestFullScreen()
-      } else {
-        bod.mozRequestFullScreen()
-      }
+  if (bod.webkitRequestFullScreen) {
+      bod.webkitRequestFullScreen()
+    } else {
+      bod.mozRequestFullScreen()
+    }
 
 }
 
@@ -523,6 +851,34 @@ document.addEventListener('keydown', ({ keyCode }) => {
         }
       }
         break;
+        case 87:
+          if(secondStage){
+            if(player1.y===player1.limitY){
+            return player1.jump();
+            }
+          }
+          break;
+          case 68:
+          if(secondStage){
+            return player1.goRight();
+            
+          }
+          break;
+          case 65:
+          if(secondStage){
+            return player1.goLeft();
+          }
+          break;
+          case 83:
+          if(secondStage){
+          return player1.goDown();
+          }
+          break;
+          case 81:
+          if(secondStage){
+          return player1.attack();
+          }
+          break;
     }
   })
 //LEE boton de inicio en fakeInicio
