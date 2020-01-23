@@ -38,6 +38,8 @@ const missilesR=[];
 const missilesL=[];
 const hearts=[];
 
+let carga=0;
+
 
 const images={
 fakeBackground:'./images/fake_menu.png',
@@ -84,121 +86,155 @@ const audioFinal=new Audio('./audio/audioFinal.mp3');
 const winnerP2=new Image()
 winnerP2.src=images.winnerP2;
 winnerP2.onload=()=>{
+  carga++;
   return;
 }
 const winnerP1=new Image()
 winnerP1.src=images.winnerP1;
 winnerP1.onload=()=>{
+  carga++;
   return;
 }
 const rocketMini=new Image()
 rocketMini.src=images.rocketMini;
 rocketMini.onload=()=>{
+  carga++;
   return;
 }
 const heart=new Image()
 heart.src=images.heart;
 heart.onload=()=>{
+  carga++;
   return;
 }
 const pvspImages=new Image()
 pvspImages.src=images.pvspImages;
 pvspImages.onload=()=>{
+  carga++;
   return;
 }
 const wavesPvsP=new Image()
 wavesPvsP.src=images.wavesPvsP;
 wavesPvsP.onload=()=>{
+  carga++;
   return;
 }
 const backPvsP=new Image()
 backPvsP.src=images.backPvsP;
 backPvsP.onload=()=>{
+  carga++;
   return;
 }
 const crocBackground=new Image()
 crocBackground.src=images.crocBackground;
 crocBackground.onload=()=>{
+  carga++;
   return;
 }
 const youLose=new Image()
 youLose.src=images.youLose;
 youLose.onload=()=>{
+  carga++;
   return;
 }
 const back1stStageBlack=new Image()
 back1stStageBlack.src=images.back1stStageBlack;
 back1stStageBlack.onload=()=>{
+  carga++;
   return;
 }
 const back1stStageGray=new Image()
 back1stStageGray.src=images.back1stStageGray;
 back1stStageGray.onload=()=>{
+  carga++;
   return;
 }
 const croc1=new Image()
 croc1.src=images.croc1;
 croc1.onload=()=>{
+  carga++;
   return;
 }
 const croc2=new Image()
 croc2.src=images.croc2;
 croc2.onload=()=>{
+  carga++;
   return;
 }
 const croc3=new Image()
 croc3.src=images.croc3;
 croc3.onload=()=>{
+  carga++;
   return;
 }
 const boats=new Image()
 boats.src=images.boats;
 boats.onload=()=>{
+  carga++;
   return;
 }
 const controls=new Image()
 controls.src=images.controls;
 controls.onload=()=>{
+  carga++;
   return;
 }
 const bullets=new Image()
 bullets.src=images.bullets;
 bullets.onload=()=>{
+  carga++;
   return;
 }
 const hunter=new Image()
 hunter.src=images.hunter;
 hunter.onload=()=>{
+  carga++;
   return;
 }
 const back1stStageColor=new Image()
 back1stStageColor.src=images.back1stStageColor;
 back1stStageColor.onload=()=>{
+  carga++;
   return;
 }
 const btnSprite=new Image()
 btnSprite.src=images.btnSprite;
 btnSprite.onload=()=>{
+  carga++;
   return;
 }
 const fName=new Image()
 fName.src=images.fakeName;
 fName.onload=()=>{
+  carga++;
   return;
 }
 const btnPlay=new Image()
 btnPlay.src=images.btnPlay;
 btnPlay.onload=()=>{
+  carga++;
   return;
 }
 const fBackground = new Image()
 fBackground.src = images.fakeBackground;
 fBackground.onload = () => {
-fakeStart();//------------------------------------------AQUI INICIA TODO
+  carga++;
+//fakeStart();//------------------------------------------AQUI INICIA TODO
 //goFirstStage();
 //goMenu();
 //gameOver2s();
 }
+
+function waitResult(){
+  if (carga===23) {
+    fakeStart();
+  } else {
+       setTimeout(waitResult, 250);
+  }
+}
+
+waitResult();
+
 //Declaramos las clases
 //------------------------------CLASE HUNTER
 class Hunter{
