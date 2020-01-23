@@ -11,16 +11,19 @@ const btnS=document.querySelector(".btn-s");
 let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
-let drawDad=false;//animacion
-let drawP1=0;//animacion
-let drawP2=0;//animacion
-let viewP1=true;
-let gameOver1s=false;
+let drawDad=false;//animacion de caminar
+let drawP1=0;//animacion de caminar
+let drawP2=0;//animacion de caminar
+let viewP1=true;//saber a que lado esta volteando el jugador
+let viewP2=true;//saber a que lado esta volteando el jugador
+let gameOver1s=false; //saber si ya termino el juego en primer escenario
 let secondFrame=0;
-let countFrames=0;
-let firstStage=true;
-let secondStage=false;
+let countFrames=0; //para hacer delays de tiempo
+let firstStage=false; //saber si nos encontramos en el primer escenario
+let secondStage=false; //saber si nos encontramos en el segundo escenario
 const gunShoots=[];
+const shootsP1=[];
+const shootsP2=[];
 const ships=[];
 const planesR=[];
 const planesL=[];
@@ -410,7 +413,7 @@ if(crocDad.x<=880&&!gameOver1s){
 hunterHan.draw();
 gunShoots.forEach((bullets,index)=>{
   if(bullets.x>1200){
-    gunShoots.splice(index,1)
+    gunShoots.splice(index,1)//----------------------------------Colisiones
   }else{                
   bullets.draw()}})
   if(crocDad.x<1000&&!gameOver1s){
@@ -538,7 +541,7 @@ class Player1{
   constructor(){
     this.x=25;
     this.y=410;
-    this.sx=5;
+    this.sx=1793;
     this.sy=5;
     this.width=160;
     this.height=168;
@@ -653,18 +656,19 @@ const player1=new Player1();
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 class Player2{
   constructor(){
-    this.x=62;
-    this.y=475;
-    this.sx=5;
+    this.x=1015;
+    this.y=410;
+    this.sx=1963;
     this.sy=5;
-    this.width=117;
-    this.height=200;
+    this.width=160;
+    this.height=168;
+    this.limitY=410;
   }
 draw(){
-  if(this.y<475){
-      this.y+=10;
+  if(this.y<this.limitY){
+      this.y+=10;//10
   }
-  ctx.drawImage(hunter,this.sx,
+  ctx.drawImage(croc2,this.sx,
                       this.sy,
                       this.width,
                       this.height,
@@ -674,55 +678,152 @@ draw(){
                       this.height);
        }
 jump(){
-  this.y=475;
-  this.sx=1067;
-  this.width=128;
-  this.height=200;
-    
-  this.y-=250;
+  this.y=410;
+  this.width=168;
+  this.height=168;
+  this.y-=300;//250
+  if(viewP2){
+  this.sx=1437;
+  }else{
+    this.sx=1615;
+  }
+  this.limitY=410;
 }
 goRight(){
-  if(this.x<400){
+  if(this.x<1040){
   this.y=410;
-  this.sx=5;
   this.width=160;
   this.height=168;
   this.x+=10;
+  
+  switch (drawP2){
+    case 0:
+      this.sx=5;
+      drawP2=1;
+      break;
+    case 1:
+      this.sx=1793;
+      drawP2=2;
+      break;
+    case 2:
+      this.sx=345;
+      drawP2=3;
+      break;
+    default:
+      this.sx=1793;
+      drawP2=0;
+      break;
   }
+
+  }
+  this.limitY=410;
+   viewP2=true;
 }
 goLeft(){
-  if(this.x>0){
-  this.y=475;
-  this.sx=132;
-  this.width=117;
-  this.height=200;
-  this.x-=10;
-  }
+  if(this.x>830){
+    this.y=410;
+    this.width=160;
+    this.height=168;
+    this.x-=10;
+    
+    switch (drawP2){
+      case 0:
+        this.sx=175;
+        drawP2=1;
+        break;
+      case 1:
+        this.sx=1963;
+        drawP2=2;
+        break;
+      case 2:
+        this.sx=515;
+        drawP2=3;
+        break;
+      default:
+        this.sx=1963;
+        drawP2=0;
+        break;
+    }
+
+    }
+   //  this.x-=4;
+   this.limitY=410;
+   viewP2=false;
 }
 goDown(){
-  this.y=515;
-  this.sx=790;
-  this.width=129;
-  this.height=160;
-  return;
+  this.y=466;
+  this.width=200;
+  this.height=112;
+  if(viewP2){
+    this.sx=1017;
+    }else{
+      this.sx=1227;
+    }
 }
 attack(){
   this.y=398;
-  this.sx=455;
-  this.width=186;
-  this.height=200;
-  shootGun();
-
+  this.width=156;
+  this.height=180;
+    this.sx=851;
+this.limitY=398
+shootFireP2();
 }
 }
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+class BallFireP1{
+  constructor(x){
+    this.x=x;
+    this.y=415;
+    this.sx=239;
+    this.sy=5;
+    this.width=68;
+    this.height=40;
+  }
+  draw(){
+    this.x+=10;
+    ctx.drawImage(pvspImages,this.sx,
+      this.sy,
+      this.width,
+      this.height,
+      this.x,
+      this.y,
+      this.width,
+      this.height);
+  }
+  
+  }
+  //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  class BallFireP2{
+    constructor(x){
+      this.x=x;
+      this.y=415;
+      this.sx=5;
+      this.sy=5;
+      this.width=68;
+      this.height=40;
+    }
+    draw(){
+      this.x-=10;
+      ctx.drawImage(pvspImages,this.sx,
+        this.sy,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height);
+    }
+    
+    }
 
 const player2=new Player2();
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 function goMenu(){
   audioCrocDadKilled.pause();
-  clearInterval(interval); //comentado momentaneo!!!!!!
+clearInterval(interval); //comentado momentaneo!!!!!!
  //inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
+ //btnStart.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
   firstStage=false;
   frames=0;
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -786,6 +887,27 @@ planesL.push (new Planes('l'))
 
 function shootFireP1(){
   audioP1.play();
+  shootsP1.push (new BallFireP1(player1.x+130))  
+}
+function shootFireP2(){
+  audioP1.play();
+  shootsP2.push (new BallFireP2(player2.x-45))  
+}
+
+function drawShootsP1(){
+  shootsP1.forEach((shootP1,index)=>{
+    if(shootP1.x>1200){
+      shootsP1.splice(index,1)//----------------------------------Colisiones
+    }else{                
+    shootP1.draw()}})
+}
+
+function drawShootsP2(){
+  shootsP2.forEach((shootP2,index)=>{
+    if(shootP2.x<-68){
+      shootsP2.splice(index,1)//----------------------------------Colisiones
+    }else{                
+    shootP2.draw()}})
 }
 
 function updatePP(){
@@ -796,6 +918,9 @@ backGamepp.draw();
 drawPlanesR();
 drawPlanesL();
   player1.draw();
+  player2.draw();
+  drawShootsP1();
+  drawShootsP2();
 
 
 }
@@ -813,37 +938,72 @@ function fullfScreen(){
 
 }
 
-
 document.addEventListener('keydown', ({ keyCode }) => {
+  switch (keyCode) {
+    case 39:
+      if(firstStage){
+      return hunterHan.goRight()
+      }
+      break;
+      case 32:
+      if(firstStage){
+      return hunterHan.attack()
+      }
+      break;
+      case 38:
+      if(firstStage){
+      if(hunterHan.y===475)
+      return hunterHan.jump()
+      }
+      break;    
+    case 37:
+      if(firstStage){
+      return hunterHan.goLeft()
+      }
+      break;
+    case 40:
+      if(firstStage){
+      return hunterHan.goDown()
+      }
+      break;
+    }
+
+
+})
+
+document.addEventListener('keyup', ({ keyCode }) => {
     switch (keyCode) {
       case 39:
-        if(firstStage){
-        return hunterHan.goRight()
+        if(secondStage){
+          return player2.goRight();
         }
         break;
-      case 32:
-        if(firstStage){
-        return hunterHan.attack()
-        }
-        break;
-      case 38:
-        if(firstStage){
-        if(hunterHan.y===475)
-        return hunterHan.jump()
+        case 77:
+         if(secondStage){
+        return player2.attack();
+         }
+         break;
+        case 38:
+        if(secondStage){
+          if(player2.y===player2.limitY){
+          return player2.jump();
+          }
         }
         break;    
       case 37:
-        if(firstStage){
-        return hunterHan.goLeft()
+        if(secondStage){
+          return player2.goLeft();
         }
         break;
       case 40:
-        if(firstStage){
-        return hunterHan.goDown()
+        if(secondStage){
+        return player2.goDown();
         }
         break;
       case 70:
+        if(firstStage||secondStage){
         fullfScreen();
+        }
       case 13:
         if(firstStage){
         if(gameOver1s){
@@ -861,7 +1021,6 @@ document.addEventListener('keydown', ({ keyCode }) => {
           case 68:
           if(secondStage){
             return player1.goRight();
-            
           }
           break;
           case 65:
@@ -885,6 +1044,7 @@ document.addEventListener('keydown', ({ keyCode }) => {
   btnStart.onclick = function() {
     inputText=inputName.value;
     longShootGunAudio.play();
+    firstStage=true;
     setTimeout(function(){
       fullfScreen();
       goFirstStage();
