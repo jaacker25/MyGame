@@ -1,6 +1,4 @@
 const bod=document.querySelector('.bod');
-
-
 const canvas=document.querySelector('canvas');
 const ctx=canvas.getContext('2d');
 const inputName=document.querySelector('.input-name');
@@ -22,12 +20,17 @@ let secondFrame=0;
 let countFrames=0; //para hacer delays de tiempo
 let firstStage=false; //saber si nos encontramos en el primer escenario
 let secondStage=false; //saber si nos encontramos en el segundo escenario
+let scoreP1=100;//valores iniciales para vida de jugador 1
+let scoreP2=100;//valores iniciales para vida de jugador 2
+let fireVelocity=10;//velocidad de bolas de ataque aumenta cada cierto tiempo
 const gunShoots=[];
 const shootsP1=[];
 const shootsP2=[];
 const ships=[];
 const planesR=[];
 const planesL=[];
+const missilesR=[];
+const missilesL=[];
 const hearts=[];
 
 images={
@@ -50,7 +53,9 @@ wavesPvsP: './images/backWaves.png',
 pvspImages: './images/sprite-PvsP.png',
 croc1: './images/spritesheet_croc1.png',
 croc2: './images/spritesheet_croc2.png',
-heart: './images/heart.png'
+heart: './images/heart.png',
+rocketMini: './images/rocketMini.png',
+backFinal: './images/backFinal.png'
 
 }
 //Cargamos Audios
@@ -64,8 +69,21 @@ const audioBtn=new Audio('./audio/audio-btn.mp3');
 const audio2ndStage=new Audio('./audio/audioStage2.mp3');
 const audioP1=new Audio('./audio/audioP1.mp3');
 const audioP2=new Audio('./audio/audioP2.mp3');
+const audioHit=new Audio('./audio/hit.mp3');
+const levelUp=new Audio('./audio/levelUp.mp3');
+const audioFinal=new Audio('./audio/audioFinal.mp3');
 
 //Cargamos Imagenes
+const backFinal=new Image()
+backFinal.src=images.backFinal;
+backFinal.onload=()=>{
+  return;
+}
+const rocketMini=new Image()
+rocketMini.src=images.rocketMini;
+rocketMini.onload=()=>{
+  return;
+}
 const heart=new Image()
 heart.src=images.heart;
 heart.onload=()=>{
@@ -671,6 +689,15 @@ attack(){
 this.limitY=398
 shootFireP1();
 }
+isTouch(element){
+  return(
+       this.x < element.x + element.width &&
+       this.x + this.width > element.x &&
+       this.y < element.y + element.height &&
+       this.y + this.height > element.y
+ 
+  )
+  }
 }
 const player1=new Player1();
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -788,6 +815,15 @@ attack(){
 this.limitY=398
 shootFireP2();
 }
+isTouch(element){
+  return(
+       this.x < element.x + element.width &&
+       this.x + this.width > element.x &&
+       this.y < element.y + element.height &&
+       this.y + this.height > element.y
+ 
+  )
+  }
 }
 const player2=new Player2();
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -801,7 +837,7 @@ class BallFireP1{
     this.height=40;
   }
   draw(){
-    this.x+=10;
+    this.x+=fireVelocity;
     ctx.drawImage(pvspImages,this.sx,
       this.sy,
       this.width,
@@ -824,7 +860,7 @@ class BallFireP1{
       this.height=40;
     }
     draw(){
-      this.x-=10;
+      this.x-=fireVelocity;
       ctx.drawImage(pvspImages,this.sx,
         this.sy,
         this.width,
@@ -859,12 +895,59 @@ class Hearts{
 
 }
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+class Missile{
+  constructor(direction){
+    this.direction=direction;
+    this.y=565;
+    this.width=89;
+    this.height=19;
+    this.sy=5;
+    if(this.direction==='r'){
+    this.x=-89;
+    this.sx=5;
+    }else{
+    this.x=1200;
+    this.sx=104;
+    }
+    
+
+  }
+  draw(){
+    
+    if(this.direction==='r'){
+      this.x+=15;
+  
+    ctx.drawImage(rocketMini,5,
+      this.sy,
+      this.width,
+      this.height,
+      this.x,
+      this.y,
+      this.width,
+      this.height);
+    }else{  
+      this.x-=15;
+      ctx.drawImage(rocketMini,104,
+        this.sy,
+        this.width,
+        this.height,
+        this.x,
+        this.y,
+        this.width,
+        this.height);
+
+    }
+
+  }
+
+}
+//ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 function goMenu(){
   audioCrocDadKilled.pause();
-clearInterval(interval); //comentado momentaneo!!!!!!
-// inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
-// btnStart.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
+ clearInterval(interval); //comentado momentaneo!!!!!!
+ //inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
+ //btnStart.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
   firstStage=false;
   frames=0;
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -926,6 +1009,30 @@ planesL.push (new Planes('l'))
     planeL.draw()}})
 }
 
+function drawMissiles(rnd){
+
+if(frames%250===0){
+  if(rnd){
+  missilesR.push (new Missile('r'))
+  }else{
+  missilesL.push (new Missile('l'))
+  }
+}
+
+  missilesR.forEach((miR,index)=>{
+    if(miR.x>1200){
+      missilesR.splice(index,1)
+    }else{                
+    miR.draw()}})
+
+  missilesL.forEach((miL,index)=>{
+     if(miL.x<-267){
+       missilesL.splice(index,1)
+     }else{                
+     miL.draw()}})
+}
+
+
 function shootFireP1(){
   audioP1.play();
   shootsP1.push (new BallFireP1(player1.x+130))  
@@ -966,6 +1073,85 @@ hearts.push (new Hearts(rnd))
     heart.draw()}})
 }
 
+function checkColisionPlayerBall(){
+  shootsP2.forEach((ball,index)=>{
+    if(player1.isTouch(ball)){
+      audioPunch.play();
+      scoreP1-=5;
+      shootsP2.splice(index,1);  
+    }
+  })
+  shootsP1.forEach((ball,index)=>{
+    if(player2.isTouch(ball)){
+      audioPunch.play();
+      scoreP2-=5;
+      shootsP1.splice(index,1);  
+    }
+  })
+}
+
+function checkColisionPlayerMissile(){
+  missilesL.forEach((rocket,index)=>{
+    if(player1.isTouch(rocket)){
+      audioPunch.play();
+      scoreP1-=3;
+      missilesL.splice(index,1);  
+    }
+  })
+  missilesR.forEach((rocket,index)=>{
+    if(player2.isTouch(rocket)){
+      audioPunch.play();
+      scoreP2-=3;
+      missilesR.splice(index,1);  
+    }
+  })
+}
+
+function checkColisionPlayerHeart(){
+  hearts.forEach((redheart,index)=>{
+    if(player1.isTouch(redheart)){
+      levelUp.play();
+      scoreP1+=5;
+      if(scoreP1>100){
+      score=100;
+      }
+      hearts.splice(index,1);  
+    }
+    if(player2.isTouch(redheart)){
+      levelUp.play();
+      scoreP2+=5;
+      if(scoreP2>100){
+      score=100;
+      }
+      hearts.splice(index,1);  
+    }
+  })
+}
+
+function checkScore(){
+  ctx.font = 'bold 35px Ubuntu';
+  ctx.fillStyle='white';
+  ctx.fillText(scoreP1,249,83,250);
+  ctx.fillText(scoreP2,1080,83,250);
+
+  if(scoreP1<=0||scoreP2<=0){
+    clearInterval(intervale);
+    setTimeout(function(){
+      gameOver2s();
+    }, 2000); 
+    
+  }
+
+}
+
+function gameOver2s(){
+  frames=0;
+  audio2ndStage.pause();
+  audioFinal.play();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(backFinal,0,0,canvas.width,canvas.height);
+}
+
 function updatePP(){
 frames++;
 ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -977,8 +1163,21 @@ drawPlanesR();
 drawPlanesL();
   player1.draw();
   player2.draw();
+  //up shoot velocity 
+  if(frames%2000===0){
+    fireVelocity+=10;
+  }
+
   drawShootsP1();
   drawShootsP2();
+
+  const rand = Math.random() < 0.5;
+  drawMissiles(rand);
+
+  checkColisionPlayerBall();
+  checkColisionPlayerHeart();
+  checkColisionPlayerMissile();
+  checkScore();
 
 
 }
@@ -1141,35 +1340,3 @@ document.addEventListener('keyup', ({ keyCode }) => {
   
 };
 
-
-
-
-
-
-
-
-  //Se ejecuta apenas abre la pagina
-//  fakeStart();
-
-
-/*
-let screenLog = document.querySelector('#screen-log');
-
-
-function logKey(e) {
-
-    ctx.fillStyle='white'
-    ctx.fillRect(e.offsetX-50,e.offsetY,10,10);
-
-}
-*/
-/*
-document.addEventListener('mousemove', clickEvent);
-function clickEvent(e) {
-  // e = Mouse click event.
-  var rect = e.target.getBoundingClientRect();
-  var x = e.clientX - rect.left; //x position within the element.
-  var y = e.clientY - rect.top;  //y position within the element.
-  ctx.fillStyle='red'
-  ctx.fillRect(x,y,10,10);
-}*/
