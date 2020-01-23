@@ -39,7 +39,7 @@ const missilesL=[];
 const hearts=[];
 
 
-images={
+const images={
 fakeBackground:'./images/fake_menu.png',
 crocBackground: './images/crocBackground.png',
 fakeName:'./images/fake_name.png',
