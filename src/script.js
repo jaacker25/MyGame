@@ -15,7 +15,8 @@ let drawP2=0;//animacion de caminar
 let viewHunter=true;//saber a que lado mira el cazador
 let viewP1=true;//saber a que lado esta volteando el jugador
 let viewP2=true;//saber a que lado esta volteando el jugador
-let gameOver1s=false; //saber si ya termino el juego en primer escenario
+let gameOver1stage=false; //saber si ya termino el juego en primer escenario
+let gameOver2stage=false; //saber si ya termino el juego en segundo escenario
 let secondFrame=0;
 let countFrames=0; //para hacer delays de tiempo
 let firstStage=false; //saber si nos encontramos en el primer escenario
@@ -23,6 +24,10 @@ let secondStage=false; //saber si nos encontramos en el segundo escenario
 let scoreP1=100;//valores iniciales para vida de jugador 1
 let scoreP2=100;//valores iniciales para vida de jugador 2
 let fireVelocity=10;//velocidad de bolas de ataque aumenta cada cierto tiempo
+let preventMultiShootH=true;
+let preventMultiShootP1=true;
+let preventMultiShootP2=true;
+const keys=[];//lee las teclas pulsadas
 const gunShoots=[];
 const shootsP1=[];
 const shootsP2=[];
@@ -32,6 +37,7 @@ const planesL=[];
 const missilesR=[];
 const missilesL=[];
 const hearts=[];
+
 
 images={
 fakeBackground:'./images/fake_menu.png',
@@ -55,7 +61,8 @@ croc1: './images/spritesheet_croc1.png',
 croc2: './images/spritesheet_croc2.png',
 heart: './images/heart.png',
 rocketMini: './images/rocketMini.png',
-backFinal: './images/backFinal.png'
+winnerP1: './images/winnerP1.png',
+winnerP2: './images/winnerP2.png'
 
 }
 //Cargamos Audios
@@ -74,9 +81,14 @@ const levelUp=new Audio('./audio/levelUp.mp3');
 const audioFinal=new Audio('./audio/audioFinal.mp3');
 
 //Cargamos Imagenes
-const backFinal=new Image()
-backFinal.src=images.backFinal;
-backFinal.onload=()=>{
+const winnerP2=new Image()
+winnerP2.src=images.winnerP2;
+winnerP2.onload=()=>{
+  return;
+}
+const winnerP1=new Image()
+winnerP1.src=images.winnerP1;
+winnerP1.onload=()=>{
   return;
 }
 const rocketMini=new Image()
@@ -185,6 +197,7 @@ fBackground.onload = () => {
 fakeStart();//------------------------------------------AQUI INICIA TODO
 //goFirstStage();
 //goMenu();
+//gameOver2s();
 }
 //Declaramos las clases
 //------------------------------CLASE HUNTER
@@ -402,7 +415,7 @@ countFrames=0;
 function update1stStage(){
 frames++;
 
-if(!gameOver1s){
+if(!gameOver1stage){
 ctx.clearRect(0,0,canvas.width,canvas.height);
 ctx.drawImage(back1stStageColor,0,0,canvas.width,canvas.height);
 
@@ -437,13 +450,13 @@ ctx.fillStyle='white';
 ctx.fillText(`Welcome ${inputText}.`,600,235,200)
 }
 if(frames>60*20){
-  if(!gameOver1s&&frames%8===0){
+  if(!gameOver1stage&&frames%8===0){
     crocDad.goLeft();
     }
   crocDad.draw();
 }
 
-if(crocDad.x<=880&&!gameOver1s){
+if(crocDad.x<=880&&!gameOver1stage){
   ctx.fillStyle='#A5DC27';
   ctx.fillText('HI!',845,477)
 }
@@ -454,7 +467,7 @@ gunShoots.forEach((bullets,index)=>{
     gunShoots.splice(index,1)//----------------------------------Colisiones
   }else{                
   bullets.draw()}})
-  if(crocDad.x<1000&&!gameOver1s){
+  if(crocDad.x<1000&&!gameOver1stage){
   checkColisionCrocBullet();
   }
 }
@@ -470,7 +483,7 @@ function checkColisionCrocBullet(){
 }
 
 function gameOverStage1(){
-  gameOver1s=true;
+  gameOver1stage=true;
   secondFrame=frames;
   audio1stStage.pause();
   audioCrocDadKilled.play();
@@ -574,6 +587,9 @@ class Planes{
   }
 
 }
+
+
+ 
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 class Player1{
   constructor(){
@@ -587,8 +603,11 @@ class Player1{
   }
 draw(){
   if(this.y<this.limitY){
-      this.y+=10;//10
-  }
+      this.y+=13;//10
+      if(this.y>=this.limitY){
+        this.y=this.limitY;
+      }
+   }
   ctx.drawImage(croc1,this.sx,
                       this.sy,
                       this.width,
@@ -713,7 +732,10 @@ class Player2{
   }
 draw(){
   if(this.y<this.limitY){
-      this.y+=10;//10
+      this.y+=13;//10
+      if(this.y>=this.limitY){
+        this.y=this.limitY;
+      }
   }
   ctx.drawImage(croc2,this.sx,
                       this.sy,
@@ -884,7 +906,7 @@ class Hearts{
   }
   draw(){
     
-    this.y+=10;
+    this.y+=6;
   
     ctx.drawImage(heart,
       this.x,
@@ -953,6 +975,7 @@ function goMenu(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(crocBackground,0,0,canvas.width,canvas.height);
   audioMenu.loop=true;
+  audioMenu.currentTime = 0;
   audioMenu.play();
  //habilita botones
  btnVsPc.setAttribute("style", "display:block");
@@ -974,8 +997,12 @@ secondStage=true;
 
 //reproducimos musica de fondo
 audio2ndStage.loop=true;
+audio2ndStage.currentTime = 0;
 audio2ndStage.play();
 frames=0;
+scoreP1=100;
+scoreP2=100;
+gameOver2stage=false;
 
 }
 
@@ -1113,7 +1140,7 @@ function checkColisionPlayerHeart(){
       levelUp.play();
       scoreP1+=5;
       if(scoreP1>100){
-      score=100;
+      scoreP1=100;
       }
       hearts.splice(index,1);  
     }
@@ -1121,7 +1148,7 @@ function checkColisionPlayerHeart(){
       levelUp.play();
       scoreP2+=5;
       if(scoreP2>100){
-      score=100;
+      scoreP2=100;
       }
       hearts.splice(index,1);  
     }
@@ -1138,7 +1165,7 @@ function checkScore(){
     clearInterval(intervale);
     setTimeout(function(){
       gameOver2s();
-    }, 2000); 
+    }, 1000); 
     
   }
 
@@ -1146,10 +1173,28 @@ function checkScore(){
 
 function gameOver2s(){
   frames=0;
+  secondStage=false;
+  gameOver2stage=true;
   audio2ndStage.pause();
+
+//Clear all elements
+shootsP1.splice(0,shootsP1.length);
+shootsP2.splice(0,shootsP2.length);
+planesL.splice(0,planesL.length);
+planesR.splice(0,planesR.length);
+missilesL.splice(0,missilesL.length);
+missilesR.splice(0,missilesR.length);
+hearts.splice(0,hearts.length);
+
   audioFinal.play();
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(backFinal,0,0,canvas.width,canvas.height);
+if(scoreP1<=0){
+  ctx.drawImage(winnerP2,0,0,canvas.width,canvas.height);
+}else{
+  ctx.drawImage(winnerP1,0,0,canvas.width,canvas.height);
+}
+
+
 }
 
 function updatePP(){
@@ -1195,113 +1240,137 @@ function fullfScreen(){
 
 }
 
-document.addEventListener('keydown', ({ keyCode }) => {
-  switch (keyCode) {
-    case 39:
-      if(firstStage){
-      return hunterHan.goRight()
-      }
-      break;
-      case 32:
-      if(firstStage){
-      return hunterHan.attack()
-      }
-      break;
-      case 38:
-      if(firstStage){
-      if(hunterHan.y===475)
-      return hunterHan.jump()
-      }
-      break;    
-    case 37:
-      if(firstStage){
-      return hunterHan.goLeft()
-      }
-      break;
-    case 40:
-      if(firstStage){
-      return hunterHan.goDown()
-      }
-      break;
+
+
+
+
+function keysPressed(e) {
+  keys[e.keyCode] = true
+  if (keys[39]) {
+    if(secondStage){
+    player2.goRight();
     }
+    if(firstStage){
+    hunterHan.goRight()
+   }
+  }
+  if (keys[32]) {
+    if(firstStage&&preventMultiShootH){
+    hunterHan.attack()
+    if(keyCode===81){
+    preventMultiShootH=false;
+    }
+    }
+  }
+
+  if (keys[38]) {
+    if(firstStage){
+    if(hunterHan.y>=475)
+    hunterHan.jump()
+    }
+    if(secondStage){
+    if(player2.y>=player2.limitY){
+    player2.jump();
+    }
+  }
+}
+  if (keys[37]) {
+    if(firstStage){
+    hunterHan.goLeft()
+    }
+    if(secondStage){
+    player2.goLeft();
+    }
+  }
+  if (keys[40]) {
+    if(firstStage){
+    hunterHan.goDown()
+    }
+    if(secondStage){
+    return player2.goDown();
+    }
+  }
+  if (keys[70]) {
+    if(firstStage||secondStage){
+    fullfScreen();
+    }
+  }
+  if (keys[77]) {
+    if(secondStage&&preventMultiShootP2){
+    player2.attack();
+    preventMultiShootP2=false;
+    }
+  }
+  if (keys[13]) {
+    if(firstStage){
+      if(gameOver1stage){
+      goMenu();
+      }
+    }
+      if(gameOver2s){
+      goMenu();
+      
+    }
+  }
+  if (keys[87]) {
+    if(secondStage){
+      if(player1.y>=player1.limitY){
+      player1.jump();
+      }
+    }
+  }
+  if (keys[68]) {
+    if(secondStage){
+      player1.goRight();
+    }
+  }
+  if (keys[65]) {
+    if(secondStage){
+      player1.goLeft();
+    }
+  }
+  if (keys[83]) {
+    if(secondStage){
+      player1.goDown();
+      }
+  }
+  if (keys[81]) {
+    if(secondStage&&preventMultiShootP1){
+      player1.attack();
+      preventMultiShootP1=false;
+      }
+  }
+  
+  e.preventDefault();
+}
+
+function keysReleased(e) {
+  keys[e.keyCode] = false;
+}
+
+document.addEventListener('keyup', ({ keyCode }) => {
+if(keyCode===81){
+  preventMultiShootP1=true;
+}
+if(keyCode===77){
+  preventMultiShootP2=true;
+}
+if(keyCode===32){
+  preventMultiShootH=true;
+}
 
 
 })
-
-document.addEventListener('keyup', ({ keyCode }) => {
-    switch (keyCode) {
-      case 39:
-        if(secondStage){
-          return player2.goRight();
-        }
-        break;
-        case 77:
-         if(secondStage){
-        return player2.attack();
-         }
-         break;
-        case 38:
-        if(secondStage){
-          if(player2.y===player2.limitY){
-          return player2.jump();
-          }
-        }
-        break;    
-      case 37:
-        if(secondStage){
-          return player2.goLeft();
-        }
-        break;
-      case 40:
-        if(secondStage){
-        return player2.goDown();
-        }
-        break;
-      case 70:
-        if(firstStage||secondStage){
-        fullfScreen();
-        }
-      case 13:
-        if(firstStage){
-        if(gameOver1s){
-        goMenu();
-        }
-      }
-        break;
-        case 87:
-          if(secondStage){
-            if(player1.y===player1.limitY){
-            return player1.jump();
-            }
-          }
-          break;
-          case 68:
-          if(secondStage){
-            return player1.goRight();
-          }
-          break;
-          case 65:
-          if(secondStage){
-            return player1.goLeft();
-          }
-          break;
-          case 83:
-          if(secondStage){
-          return player1.goDown();
-          }
-          break;
-          case 81:
-          if(secondStage){
-          return player1.attack();
-          }
-          break;
-    }
-  })
 //LEE boton de inicio en fakeInicio
   btnStart.onclick = function() {
     inputText=inputName.value;
     longShootGunAudio.play();
     firstStage=true;
+
+
+    window.addEventListener("keydown", keysPressed, false);
+    window.addEventListener("keyup", keysReleased, false);
+
     setTimeout(function(){
       fullfScreen();
       goFirstStage();
