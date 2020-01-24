@@ -1,3 +1,7 @@
+//Where's Dad?
+//by:jaacker25 | Jorge Aguilar
+//January 2020
+
 const bod=document.querySelector('.bod');
 const canvas=document.querySelector('canvas');
 const ctx=canvas.getContext('2d');
@@ -514,8 +518,10 @@ function gameOverStage1(){
 }
 
 function shootGun(){
+  if(gunShoots.length<3){
   shootGunAudio.play();
-  gunShoots.push (new Bullet(hunterHan.x+180))  
+  gunShoots.push (new Bullet(hunterHan.x+180))
+  }  
 }
 
 function drawShips(){
@@ -1091,12 +1097,16 @@ if(frames%250===0){
 
 
 function shootFireP1(){
+  if(shootsP1.length<2){
   audioP1.play();
-  shootsP1.push (new BallFireP1(player1.x+130))  
+  shootsP1.push (new BallFireP1(player1.x+130))
+  }  
 }
 function shootFireP2(){
+  if(shootsP2.length<2){
   audioP2.play();
   shootsP2.push (new BallFireP2(player2.x-45))  
+  }
 }
 
 function drawShootsP1(){
