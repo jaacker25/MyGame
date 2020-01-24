@@ -1,6 +1,6 @@
 //Where's Dad?
 //by:jaacker25 | Jorge Aguilar
-//January 2020
+//January 2020.
 
 const bod=document.querySelector('.bod');
 const canvas=document.querySelector('canvas');
