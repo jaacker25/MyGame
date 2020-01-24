@@ -1,12 +1,9 @@
 const bod=document.querySelector('.bod');
 const canvas=document.querySelector('canvas');
 const ctx=canvas.getContext('2d');
-const inputName=document.querySelector('.input-name');
-const btnStart=document.querySelector(".start-button");
 const btnVsPc=document.querySelector(".btn-vs-pc");
 const btnPvsP=document.querySelector(".btn-pvsp");
 const btnS=document.querySelector(".btn-s");
-let inputText=inputName.value;
 let fullScreen=false;
 let frames=0;
 let drawDad=false;//animacion de caminar
@@ -17,8 +14,10 @@ let viewP1=true;//saber a que lado esta volteando el jugador
 let viewP2=true;//saber a que lado esta volteando el jugador
 let gameOver1stage=false; //saber si ya termino el juego en primer escenario
 let gameOver2stage=false; //saber si ya termino el juego en segundo escenario
+let ins=false;//saber si nos encontramos en la pagina de instrucciones
 let secondFrame=0;
 let countFrames=0; //para hacer delays de tiempo
+let menuIntro=true;
 let firstStage=false; //saber si nos encontramos en el primer escenario
 let secondStage=false; //saber si nos encontramos en el segundo escenario
 let scoreP1=100;//valores iniciales para vida de jugador 1
@@ -44,8 +43,6 @@ let carga=0;
 const images={
 fakeBackground:'./images/fake_menu.png',
 crocBackground: './images/crocBackground.png',
-fakeName:'./images/fake_name.png',
-btnPlay:'./images/play.png',
 btnSprite:'./images/buttons.png',
 back1stStageColor: './images/1stStage_color.png',
 back1stStageGray: './images/1stStage_gray.png',
@@ -64,7 +61,8 @@ croc2: './images/spritesheet_croc2.png',
 heart: './images/heart.png',
 rocketMini: './images/rocketMini.png',
 winnerP1: './images/winnerP1.png',
-winnerP2: './images/winnerP2.png'
+winnerP2: './images/winnerP2.png',
+instructions: './images/instructions.png'
 
 }
 //Cargamos Audios
@@ -83,6 +81,12 @@ const levelUp=new Audio('./audio/levelUp.mp3');
 const audioFinal=new Audio('./audio/audioFinal.mp3');
 
 //Cargamos Imagenes
+const instructions=new Image()
+instructions.src=images.instructions;
+instructions.onload=()=>{
+  carga++;
+  return;
+}
 const winnerP2=new Image()
 winnerP2.src=images.winnerP2;
 winnerP2.onload=()=>{
@@ -203,31 +207,18 @@ btnSprite.onload=()=>{
   carga++;
   return;
 }
-const fName=new Image()
-fName.src=images.fakeName;
-fName.onload=()=>{
-  carga++;
-  return;
-}
-const btnPlay=new Image()
-btnPlay.src=images.btnPlay;
-btnPlay.onload=()=>{
-  carga++;
-  return;
-}
+
 const fBackground = new Image()
 fBackground.src = images.fakeBackground;
 fBackground.onload = () => {
   carga++;
-//fakeStart();//------------------------------------------AQUI INICIA TODO
-//goFirstStage();
-//goMenu();
-//gameOver2s();
+
 }
 
 function waitResult(){
-  if (carga===23) {
-    fakeStart();
+  if (carga===22) {
+    //goMenu();
+    fakeStart();//------------------------------------------AQUI INICIA TODO
   } else {
        setTimeout(waitResult, 250);
   }
@@ -417,24 +408,13 @@ ctx.strokeStyle = "white";
 ctx.strokeRect(0,0,canvas.width,canvas.height);
 //Dibuja fondo
 ctx.drawImage(fBackground,0,0,canvas.width,canvas.height);
-//Dibuja logo
-ctx.drawImage(fName,500,550);
-//Dibuja boton de Play
-ctx.drawImage(btnPlay,950,325,179,197);
-//Dibuja Check In (Ingresa tu nombre para continuar)
-ctx.drawImage(btnSprite,0,200,413,138,800,50,380,80)
-ctx.font = '45px Ubuntu';
-ctx.fillStyle='white';
-ctx.fillText("What's your name",860,105,250)
-//Check Name 
 
 }
 //-------------------------------------------------first STAGE-------------------
 //El primer escenario del juego con el tutorial de inicio
 function goFirstStage(){
 //Borramos la pantalla de inicio
-inputName.setAttribute("style", "display:none");
-btnStart.setAttribute("style", "display:none");
+
 ctx.clearRect(0,0,canvas.width,canvas.height);
 //Cargamos el nuevo escenario
 ctx.drawImage(back1stStageGray,0,0,canvas.width,canvas.height);
@@ -476,16 +456,16 @@ ctx.drawImage(boats,324,5,444,450,717,118,444,450);
 
 
 //despliega por 15 segundos las instrucciones
-if(frames<60*15){
+if(frames<60*10){
 ctx.strokeStyle='white'
 ctx.strokeRect(334,10,532,186)
 ctx.drawImage(controls,334,10,532,186);
-ctx.font = '40px Ubuntu';
+ctx.font = 'bold 40px Ubuntu';
 ctx.textAlign = "center";
 ctx.fillStyle='white';
-ctx.fillText(`Welcome ${inputText}.`,600,235,200)
+ctx.fillText(`Welcome friend, you are the hunter!`,600,235,500)
 }
-if(frames>60*20){
+if(frames>60*12){
   if(!gameOver1stage&&frames%8===0){
     crocDad.goLeft();
     }
@@ -755,6 +735,7 @@ isTouch(element){
   }
 }
 const player1=new Player1();
+const playerSuper=new Player1();
 //ccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 class Player2{
   constructor(){
@@ -1004,20 +985,32 @@ class Missile{
 function goMenu(){
   audioCrocDadKilled.pause();
  clearInterval(interval); //comentado momentaneo!!!!!!
- //inputName.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
- //btnStart.setAttribute("style", "display:none"); //agregado momentaneo!!!!!!
   firstStage=false;
   frames=0;
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(crocBackground,0,0,canvas.width,canvas.height);
+  if(!ins){
   audioMenu.loop=true;
   audioMenu.currentTime = 0;
   audioMenu.play();
+  }
+  ins=false;
  //habilita botones
  btnVsPc.setAttribute("style", "display:block");
  btnPvsP.setAttribute("style", "display:block");
  btnS.setAttribute("style", "display:block");
 
+}
+
+function instructive(){
+//Borramos la pantalla de inicio y botones
+btnVsPc.setAttribute("style", "display:none");
+btnPvsP.setAttribute("style", "display:none");
+btnS.setAttribute("style", "display:none");
+ctx.clearRect(0,0,canvas.width,canvas.height);
+//Cargamos el nuevo escenario
+ctx.drawImage(instructions,0,0,canvas.width,canvas.height);
+ins=true;
 }
 
 function goGamePvsP(){
@@ -1030,6 +1023,7 @@ ctx.clearRect(0,0,canvas.width,canvas.height);
 ctx.drawImage(backPvsP,0,0,canvas.width,canvas.height);
 intervale = setInterval(updatePP, 1000 / 60)
 secondStage=true;
+
 
 //reproducimos musica de fondo
 audio2ndStage.loop=true;
@@ -1273,12 +1267,12 @@ function fullfScreen(){
     } else {
       bod.mozRequestFullScreen()
     }
-
 }
 
 
 
-
+window.addEventListener("keydown", keysPressed, false);
+window.addEventListener("keyup", keysReleased, false);
 
 function keysPressed(e) {
   keys[e.keyCode] = true
@@ -1343,9 +1337,17 @@ function keysPressed(e) {
       goMenu();
       }
     }
-      if(gameOver2s){
+      if(gameOver2stage){
       goMenu();
       
+    }
+    if(menuIntro){
+      btnStart();
+
+    }
+    if(ins){
+      audioBtn.play();
+      goMenu();
     }
   }
   if (keys[87]) {
@@ -1370,6 +1372,7 @@ function keysPressed(e) {
       player1.goDown();
       }
   }
+
   if (keys[81]) {
     if(secondStage&&preventMultiShootP1){
       player1.attack();
@@ -1397,16 +1400,13 @@ if(keyCode===32){
 
 
 })
+
 //LEE boton de inicio en fakeInicio
-  btnStart.onclick = function() {
-    inputText=inputName.value;
+    function btnStart(){
     longShootGunAudio.play();
     firstStage=true;
-
-
-    window.addEventListener("keydown", keysPressed, false);
-    window.addEventListener("keyup", keysReleased, false);
-
+   
+    menuIntro=false;
     setTimeout(function(){
       fullfScreen();
       goFirstStage();
@@ -1425,22 +1425,22 @@ if(keyCode===32){
     
   };
 
- //LEE boton de vsPC
+ //LEE boton de Instructions
  btnVsPc.onclick = function() {
   audioBtn.play();
   //audioMenu.pause();
- // setTimeout(function(){
-    //goGameVsPC();
- // }, 1000); 
+  setTimeout(function(){
+    instructive();
+  }, 1000); 
   
 };
 
  //LEE boton de SuperGame
  btnS.onclick = function() {
   audioBtn.play();
-  //audioMenu.pause();
-  //setTimeout(function(){
-    //goGameSuper();
+ // audioMenu.pause();
+ // setTimeout(function(){
+ //   goGameSuper();
  // }, 1000); 
   
 };
