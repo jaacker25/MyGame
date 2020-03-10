@@ -1,5 +1,5 @@
 # Where's Dad?
-Where's Dad en su version Demo es un juego desarrollado con ayuda de javascript como parte de un proyecto en el Web Development Bootcamp de Ironhack.
+Where's Dad en su version Demo es un juego desarrollado con ayuda de javascript como parte del proyecto de modulo 1 en el Web Development Bootcamp de Ironhack.
 
 ![Game](https://github.com/jaacker25/MyGame/blob/master/src/images/crocBackground.png?raw=true)
 
@@ -32,3 +32,5 @@ Es una familia de cocodrilos formada por padre, madre y dos crias, en el que un 
 El jugador al que su nivel de energia llegue a cero primero, es el perdedor del encuentro. 
 
 ![Game](https://s3.amazonaws.com/media-p.slid.es/uploads/1252742/images/6990559/Screenshot_from_2020-01-24_00-07-40.png?raw=true)
+
+Para jugar el demo ingresa a este link: [Wheres Dad Game](https://www.wheresdad.xyz/)
